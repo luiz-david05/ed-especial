@@ -13,11 +13,9 @@ gcc -o q1 q1.c
 printf("%.nf\n",a);
 ```
 
-where n is the number of digits after the decimal point to be displayed. You can 
-
-specify value of n
+where n is the number of digits after the decimal point to be displayed. You can specify value of n
 maximum value of n is 6 also is its default value
-for e.g. printf("%.2f",a); will display decimal number upto two digits after the decimal place
+for e.g. printf("%.2f",a);
 
 You can know more about displaying data as
 
