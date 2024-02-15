@@ -1,7 +1,6 @@
 #include <stdio.h>
 
-// compilar: gcc nome_do_arquivo.c -o nome_do_executavel
-// executar: ./nome_do_executavel | ./nome_do_executavel.exe
+/* Leia uma velocidade em m/s, calcule e escreva esta velocidade em km/h. (Vkm/h = Vm/s * 3.6) */
 
 int main() {
     float n;

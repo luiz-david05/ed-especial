@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+/* Leia 3 números, calcule e escreva a soma dos 2 primeiros e a diferença entre os 2 últimos. */
+
 int main() {
     int n1, n2, n3;
     printf("digite os 3 numeros: ");

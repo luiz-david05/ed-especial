@@ -1,7 +1,8 @@
 #include <stdio.h>
 
-int main()
-{
+/* Leia um número inteiro (3 dígitos), calcule e escreva a soma de seus elementos (C + D + U). */
+
+int main() {
     int n;
     printf("Digite o numero de 3 digitos: ");
     scanf("%d", &n);

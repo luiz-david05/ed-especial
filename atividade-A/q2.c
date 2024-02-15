@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+/* Leia um valor em horas e um valor em minutos, calcule e escreva o equivalente em minutos. */
+
 int main() {
     int hr, min;
     printf("Digite a hora: ");
