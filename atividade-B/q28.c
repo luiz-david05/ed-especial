@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-/* Leia um número inteiro de horas, calcule e escreva quantas semanas, quantos dias e 
+/* Leia um nï¿½mero inteiro de horas, calcule e escreva quantas semanas, quantos dias e 
 quantas horas ele corresponde.*/
 
 int main() {
@@ -10,8 +10,7 @@ int main() {
 	
 	int resto = hr;
 	int semanas = resto / (24 * 7);
-	resto %= semanas;
-	int resto_hr = resto;
+	int resto_hr = resto %= 24 * 7;
 	
 	printf("Resultado: %d Semanas e %d horas\n", semanas, resto_hr);
 	
