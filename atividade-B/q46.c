@@ -19,4 +19,4 @@ int main() {
     printf("Resultado: Entrada = %.2f, Prestacao = %.2f\n", entrada, prestacao);
 
     return 0;
-}
+} 
