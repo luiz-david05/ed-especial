@@ -128,32 +128,56 @@ média e a variância de um conjunto de números fornecidos pelo usuário. Nesse
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(void) {
-    int i, n;
-    float *v;
-    float med, var;
+double calcularMedia(int n, int *v)
+{
+    int i;
+    double soma = 0;
 
-    /* leitura do número de valores */
+    for (i = 0; i < n; i++) {
+        soma += v[i];
+    }
+
+    return soma / n;
+}
+
+double calcularVariancia(int n, int *v, double m) {
+    int i;
+    double soma = 0;
+
+    for (i = 0; i < n; i++) {
+        soma += (v[i] - m) * (v[i] - m);
+    }
+
+    return soma / n;
+}
+
+int main()
+{
+    int *v, i, n;
+    double media, variancia;
+    printf("Digite o tamanho do vetor: ");
     scanf("%d", &n);
 
-    /* alocação dinâmica */
-    v = (float*) malloc(n * sizeof(float));
+    v = (int *) malloc(n * sizeof(int));
+
     if (v == NULL) {
         printf("Memoria insuficiente.\n");
+
         return 1;
     }
 
-    /* leitura dos valores */
-    for (i = 0; i < n; i++)
-        scanf("%f", &v[i]);
+    printf("Digite os elementos do vetor de tamanho %d\n", n);
+    for (i = 0; i < n; i++) {
+        printf("->: ");
+        scanf("%d", &v[i]);
+    }
 
-    /* cálculo da média e variância */
-    med = media(n, v);
-    var = variancia(n, v, med);
-    printf("Media = %f, Variancia = %f\n", med, var);
+    media = calcularMedia(n, v);
+    variancia = calcularVariancia(n, v, media);
 
-    /* liberação de memória */
+    printf("Media = %.1lf, Variancia = %.1lf\n", media, variancia);
     free(v);
+
     return 0;
 }
 ```
