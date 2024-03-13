@@ -49,6 +49,7 @@ comuns são:
 
 ```c
 #include <stdio.h>
+#include <stdlib.h>
 
 int main() {
     int *p;
@@ -73,6 +74,7 @@ apontado por `p`. Por fim, a função `free` libera o bloco de memória alocado.
 ```c
 
 #include <stdio.h>
+#include <stdlib.h>
 
 int main() {
     int *v;
