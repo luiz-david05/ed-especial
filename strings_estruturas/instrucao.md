@@ -5,4 +5,4 @@ adicionar funcionalidades:
 3 - atualizar aluno
 4 - remover aluno
 5 - buscar aluno por matricula
-6 - buscar aluno por nome
+6 - buscar aluno por parte do nome
