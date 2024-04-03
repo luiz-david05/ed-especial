@@ -3,28 +3,29 @@
 #include <string.h>
 #include <stdbool.h>
 
-struct aluno
+typedef struct
 {
     int matricula;
     char nome[120];
     //    int idade;
     //    float renda;
-};
-void exibir_menu();
-void pedir_dados(struct aluno *novoAluno);
-void listar_alunos(struct aluno *alunos, int qtdAlunos);
-void atualizar_aluno(struct aluno *alunos, int qtdAlunos);
-void remover_aluno(struct aluno *alunos, int *qtdAlunos, int mat);
-void buscar_aluno_matricula(struct aluno *alunos, int qtdAlunos, int mat);
-void buscar_aluno_nome(struct aluno *alunos, int qtdAlunos, char *nome);
+}Aluno;
+
+void exibeMenu();
+void pedeDados(Aluno *novoAluno);
+void listaAlunos(Aluno *alunos, int qtdAlunos);
+void atualizaAluno(Aluno *alunos, int qtdAlunos);
+void removeAluno(Aluno *alunos, int *qtdAlunos, int mat);
+void buscaAlunoMatricula(Aluno *alunos, int qtdAlunos, int mat);
+void buscaAlunoParteNome(Aluno *alunos, int qtdAlunos, char *nome);
 
 int main()
 {
-    struct aluno *alunos;
-    alunos = (struct aluno *)malloc(10 * sizeof(struct aluno));
+    Aluno *alunos;
+    alunos = (Aluno *)malloc(10 * sizeof(Aluno));
     int qtdAlunos = 0;
 
-    exibir_menu();
+    exibeMenu();
     int opcao;
     scanf("%d", &opcao);
 
@@ -33,8 +34,8 @@ int main()
         if (opcao == 1)
         {
             printf("\nCadastrar novo aluno!\n");
-            struct aluno novoAluno;
-            pedir_dados(&novoAluno);
+            Aluno novoAluno;
+            pedeDados(&novoAluno);
             alunos[qtdAlunos] = novoAluno;
             qtdAlunos++;
             printf("\nNovo aluno cadastrado com sucesso!\n");
@@ -42,12 +43,12 @@ int main()
         else if (opcao == 2)
         {
             printf("\nListar alunos!\n");
-            listar_alunos(alunos, qtdAlunos);
+            listaAlunos(alunos, qtdAlunos);
         }
         else if (opcao == 3)
         {
             printf("\nAtualizar aluno!\n");
-            atualizar_aluno(alunos, qtdAlunos);
+            atualizaAluno(alunos, qtdAlunos);
         }
         else if (opcao == 4)
         {   
@@ -55,7 +56,7 @@ int main()
             int matUser;
             printf("Digite a matricula do aluno: ");
             scanf("%d", &matUser);
-            remover_aluno(alunos, &qtdAlunos, matUser);
+            removeAluno(alunos, &qtdAlunos, matUser);
         }
         else if (opcao == 5)
         {
@@ -64,7 +65,7 @@ int main()
             int mat;
             scanf("%d", &mat);
 
-            buscar_aluno_matricula(alunos, qtdAlunos, mat);
+            buscaAlunoMatricula(alunos, qtdAlunos, mat);
         }
         else if (opcao == 6)
         {
@@ -73,10 +74,10 @@ int main()
             char nome[120];
             scanf(" %120[^\n]", &nome);
 
-            buscar_aluno_nome(alunos, qtdAlunos, nome);
+            buscaAlunoParteNome(alunos, qtdAlunos, nome);
         }
 
-        exibir_menu();
+        exibeMenu();
         scanf("%d", &opcao);
     }
 
@@ -85,12 +86,12 @@ int main()
     return 0;
 }
 
-void exibir_menu() {
+void exibeMenu() {
     char menu[] = "\t\t\t>>> SysAlunos <<<\n1 - Adicionar aluno\n2 - Listar alunos\n3 - Atualizar aluno\n4 - Remover aluno\n5 - Buscar aluno pela matricula\n6 - Buscar aluno pelo nome\n0 - sair\n\ndigite aqui ->: ";
     printf("%s", menu);
 }
 
-void pedir_dados(struct aluno *novoAluno)
+void pedeDados(Aluno *novoAluno)
 {
     printf("Matricula: ");
     scanf("%d", &novoAluno->matricula);
@@ -105,7 +106,7 @@ void pedir_dados(struct aluno *novoAluno)
     //    scanf("%f", &novoAluno->renda);
 }
 
-void listar_alunos(struct aluno *alunos, int qtdAlunos)
+void listaAlunos(Aluno *alunos, int qtdAlunos)
 {
     int i;
     if (qtdAlunos >= 1)
@@ -123,7 +124,7 @@ void listar_alunos(struct aluno *alunos, int qtdAlunos)
     }
 }
 
-void atualizar_aluno(struct aluno *alunos, int qtdAlunos)
+void atualizaAluno(Aluno *alunos, int qtdAlunos)
 {
     int mat_user;
     printf("Digite a matricula do aluno: ");
@@ -136,7 +137,7 @@ void atualizar_aluno(struct aluno *alunos, int qtdAlunos)
         if (mat_user == alunos[i].matricula)
         {
             printf("Digite os novos dados do aluno:\n");
-            pedir_dados(&alunos[i]);
+            pedeDados(&alunos[i]);
             alunoEncontrado = true;
             break;
         }
@@ -147,7 +148,7 @@ void atualizar_aluno(struct aluno *alunos, int qtdAlunos)
     }
 }
 
-void remover_aluno(struct aluno *alunos, int *qtdAlunos, int mat)
+void removeAluno(Aluno *alunos, int *qtdAlunos, int mat)
 {   
     bool alunoEncontrado = false;
 
@@ -175,7 +176,7 @@ void remover_aluno(struct aluno *alunos, int *qtdAlunos, int mat)
 }
 
 
-void buscar_aluno_matricula(struct aluno *alunos, int qtdAlunos, int mat)
+void buscaAlunoMatricula(Aluno *alunos, int qtdAlunos, int mat)
 {
     int i;
     bool alunoEncontrado = false;
@@ -196,7 +197,7 @@ void buscar_aluno_matricula(struct aluno *alunos, int qtdAlunos, int mat)
     }
 }
 
-void buscar_aluno_nome(struct aluno *alunos, int qtdAlunos, char *nome) {
+void buscaAlunoParteNome(Aluno *alunos, int qtdAlunos, char *nome) {
     int i;
     bool alunoEncontrado = false;
 
