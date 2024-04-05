@@ -23,7 +23,7 @@ Titular *criaTitular()
 
     printf("Informe o cpf do titular(no formato ***.***.***-**): ");
     fgets(titular->cpf, sizeof(titular->cpf), stdin);
-    titular->cpf[strcspn(titular->cpf, "\n")] = '\0';
+    titular->cpf[strcspn(titular->cpf, "\n")] = '\0'; 
 
     // printf("\nInforme a renda mensal do titular: ");
     // scanf("%d", &titular->renda);
@@ -100,6 +100,7 @@ Conta *criaConta()
     printf("\nO numero da conta foi gerado automaticamente e de forma pseudoaleatoria.\nSaldo da conta inicializado em 0.\n");
     novaConta->numero = rand() % 10000;
     novaConta->saldo = 0.0;
+    novaConta->transacoes = NULL;
 
     printf("\nConta '%d' criada com sucesso!\n", novaConta->numero);
 
@@ -163,7 +164,7 @@ void adicionaContaAoBanco(Banco *banco, Conta *novaConta, int *qtdContas)
     (*qtdContas)++;
 }
 
-void deposita(Conta *contas, int qtdContas, int numeroConta, int *qtdTransacoes)
+void deposita(Conta *contas, int qtdContas, int numeroConta, int *qtdTransacoes, float valor)
 {
     int indice = consultaContaPorIndice(contas, numeroConta, qtdContas);
     int confirma;
@@ -175,9 +176,6 @@ void deposita(Conta *contas, int qtdContas, int numeroConta, int *qtdTransacoes)
     }
 
     Conta *contaProcurada = &contas[indice];
-    float valor;
-    printf("\nValor do deposito: ");
-    scanf("%f", &valor);
     printf("Depositar: %.2f na conta de numero '%d' ?\nTecle 1 para confirmar e 0 para cancelar: ", valor, contaProcurada->numero);
     scanf("%d", &confirma);
 
@@ -186,11 +184,12 @@ void deposita(Conta *contas, int qtdContas, int numeroConta, int *qtdTransacoes)
         contaProcurada->saldo += valor;
         printf("\nDeposito realizado com sucesso!\n");
         printf("Novo saldo: %.2f\n", contaProcurada->saldo);
-        
-        Transacao *novaTransacao = criaTransacao();
+
+        Transacao *novaTransacao;
+        novaTransacao = criaTransacao();
+        novaTransacao->data = criaDataAtual();
         strcpy(novaTransacao->tipo, "Deposito");
         novaTransacao->valor = valor;
-
         adicionaTransacao(contaProcurada, novaTransacao, qtdTransacoes);
     }
     else
@@ -199,7 +198,7 @@ void deposita(Conta *contas, int qtdContas, int numeroConta, int *qtdTransacoes)
     }
 }
 
-void saca(Conta *contas, int qtdContas, int numeroConta)
+void saca(Conta *contas, int qtdContas, int numeroConta, int *qtdTransacoes, float valor)
 {
     int indice = consultaContaPorIndice(contas, numeroConta, qtdContas);
     int confirma;
@@ -211,9 +210,6 @@ void saca(Conta *contas, int qtdContas, int numeroConta)
     }
 
     Conta *contaProcurada = &contas[indice];
-    float valor;
-    printf("\nValor do saque: ");
-    scanf("%f", &valor);
 
     if (contaProcurada->saldo < valor)
     {
@@ -229,6 +225,13 @@ void saca(Conta *contas, int qtdContas, int numeroConta)
         contaProcurada->saldo -= valor;
         printf("\nSaque realizado com sucesso!\n");
         printf("Novo saldo: %.2f\n", contaProcurada->saldo);
+
+        Transacao *novaTransacao;
+        novaTransacao = criaTransacao();
+        novaTransacao->data = criaDataAtual();
+        strcpy(novaTransacao->tipo, "Saque");
+        novaTransacao->valor = -valor;
+        adicionaTransacao(contaProcurada, novaTransacao, qtdTransacoes);
     }
     else
     {
@@ -263,7 +266,7 @@ int consultaChavePix(Conta *contas, int qtdContas, char *chave)
     return -1;
 }
 
-void realizaPix(Conta *contas, int qtdContas)
+void realizaPix(Conta *contas, int qtdContas, int *qtdTransacoes)
 {
     char chaveOrigem[15];
     char chaveDestino[15];
@@ -316,10 +319,23 @@ void realizaPix(Conta *contas, int qtdContas)
         printf("\nPix enviado com sucesso!\n");
         printf("Novo saldo conta de origem: %.2f\n", contaOrigem->saldo);
         printf("Novo saldo conta de destino: %.2f\n", contaDestino->saldo);
+
+        Transacao *transacaoOrigem = criaTransacao();
+        transacaoOrigem->data = criaDataAtual();
+        strcpy(transacaoOrigem->tipo, "PIX");
+        transacaoOrigem->valor = -valor;
+        adicionaTransacao(contaOrigem, transacaoOrigem, qtdTransacoes);
+
+        Transacao *transacaoDestino = criaTransacao();
+        transacaoDestino->data = criaDataAtual();
+        strcpy(transacaoDestino->tipo, "PIX");
+        transacaoDestino->valor = valor;
+        adicionaTransacao(contaOrigem, transacaoDestino, qtdTransacoes);
     }
     else
     {
         printf("\nOperacao cancelada!\n");
+        return;
     }
 }
 
