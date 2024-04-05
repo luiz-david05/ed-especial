@@ -20,11 +20,12 @@ typedef struct
     float renda;
 } Titular;
 
-typedef struct {
+typedef struct
+{
     char data[11];
     char tipo[7];
     float valor;
-}Transacoes;
+} Transacoes;
 
 typedef struct
 {
@@ -43,8 +44,7 @@ typedef struct
 
 Titular *criaTitular()
 {
-    Titular *titular;
-    titular = (Titular *)malloc(sizeof(Titular));
+    Titular *titular = (Titular *)malloc(sizeof(Titular));
 
     if (titular == NULL)
     {
@@ -52,16 +52,16 @@ Titular *criaTitular()
         exit(EXIT_FAILURE);
     }
 
-    strcpy(titular->nome, "Luiz David Silva");
-    strcpy(titular->cpf, "123.456.789-00");
+    // strcpy(titular->nome, "Luiz David Silva");
+    // strcpy(titular->cpf, "123.456.789-00");
+    getchar();
+    printf("Informe o nome do titular: ");
+    fgets(titular->nome, sizeof(titular->nome), stdin);
+    titular->nome[strcspn(titular->nome, "\n")] = '\0';
 
-    // printf("Informe o nome do titular: ");
-    // fgets(titular->nome, sizeof(titular->nome), stdin);
-    // titular->nome[strcspn(titular->nome, "\n")] = '\0';
-
-    // printf("Informe o cpf do titular(no formato ***.***.***-**): ");
-    // fgets(titular->cpf, sizeof(titular->cpf), stdin);
-    // titular->cpf[strcspn(titular->cpf, "\n")] = '\0';
+    printf("Informe o cpf do titular(no formato ***.***.***-**): ");
+    fgets(titular->cpf, sizeof(titular->cpf), stdin);
+    titular->cpf[strcspn(titular->cpf, "\n")] = '\0';
 
     // printf("\nInforme a renda mensal do titular: ");
     // scanf("%d", &titular->renda);
@@ -192,11 +192,13 @@ void listaContasBanco(Banco *banco, int qtdContas)
     }
 }
 
-void deposita(Conta *contas, int qtdContas, int numeroConta) {
+void deposita(Conta *contas, int qtdContas, int numeroConta)
+{
     int indice = consultaContaPorIndice(contas, numeroConta, qtdContas);
     int confirma;
 
-    if (indice == -1) {
+    if (indice == -1)
+    {
         printf("\nConta nao encontrada!\n");
         return;
     }
@@ -208,20 +210,25 @@ void deposita(Conta *contas, int qtdContas, int numeroConta) {
     printf("Depositar: %.2f na conta de numero '%d' ?\nTecle 1 para confirmar e 0 para cancelar: ", valor, contaProcurada->numero);
     scanf("%d", &confirma);
 
-    if (confirma == 1) {
+    if (confirma == 1)
+    {
         contaProcurada->saldo += valor;
         printf("\nDeposito realizado com sucesso!\n");
         printf("Novo saldo: %.2f\n", contaProcurada->saldo);
-    } else {
+    }
+    else
+    {
         printf("\nOperacao cancelada!\n");
     }
 }
 
-void saca(Conta *contas, int qtdContas, int numeroConta) {
+void saca(Conta *contas, int qtdContas, int numeroConta)
+{
     int indice = consultaContaPorIndice(contas, numeroConta, qtdContas);
     int confirma;
 
-    if (indice == -1) {
+    if (indice == -1)
+    {
         printf("\nConta nao encontrada!\n");
         return;
     }
@@ -230,8 +237,9 @@ void saca(Conta *contas, int qtdContas, int numeroConta) {
     float valor;
     printf("\nValor do saque: ");
     scanf("%f", &valor);
-        
-    if (contaProcurada->saldo < valor) {
+
+    if (contaProcurada->saldo < valor)
+    {
         printf("\nSaldo da conta insuficente!\n");
         return;
     }
@@ -239,25 +247,103 @@ void saca(Conta *contas, int qtdContas, int numeroConta) {
     printf("Sacar: %.2f da conta de numero '%d' ?\nTecle 1 para confirmar e 0 para cancelar: ", valor, contaProcurada->numero);
     scanf("%d", &confirma);
 
-    if (confirma == 1) {
+    if (confirma == 1)
+    {
         contaProcurada->saldo -= valor;
         printf("\nSaque realizado com sucesso!\n");
         printf("Novo saldo: %.2f\n", contaProcurada->saldo);
-    } else {
+    }
+    else
+    {
         printf("\nOperacao cancelada!\n");
     }
 }
 
-void consultaSaldo(Conta *contas, int qtdContas, int numeroConta) {
+void consultaSaldo(Conta *contas, int qtdContas, int numeroConta)
+{
     int indice = consultaContaPorIndice(contas, numeroConta, qtdContas);
 
-    if (indice == -1) {
+    if (indice == -1)
+    {
         printf("\nConta nao encontrada!\n");
         return;
     }
 
     Conta *contaProcurada = &contas[indice];
     printf("\nConta de numero %d, saldo = %.2f\n", contaProcurada->numero, contaProcurada->saldo);
+}
+
+int consultaChavePix(Conta *contas, int qtdContas, char *chave)
+{
+    int i;
+    for (i = 0; i < qtdContas; i++)
+    {
+        if (strcmp(contas[i].titular->cpf, chave) == 0)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void realizaPix(Conta *contas, int qtdContas)
+{
+    char chaveOrigem[15];
+    char chaveDestino[15];
+
+    getchar();
+    printf("Informe a chave de origem: ");
+    fgets(chaveOrigem, sizeof(chaveOrigem), stdin);
+    chaveOrigem[strcspn(chaveOrigem, "\n")] = '\0';
+
+    printf("Informe a chave de destino: ");
+    fgets(chaveDestino, sizeof(chaveDestino), stdin);
+    chaveDestino[strcspn(chaveDestino, "\n")] = '\0';
+
+    int indiceOrigem = consultaChavePix(contas, qtdContas, chaveOrigem);
+    int indiceDestino = consultaChavePix(contas, qtdContas, chaveDestino);
+
+    if (indiceOrigem == -1)
+    {
+        printf("\nChave pix '%s' nao encontrada\n", chaveOrigem);
+        return;
+    }
+
+    if (indiceDestino == -1)
+    {
+        printf("\nChave pix '%s' nao encontrada\n", chaveDestino);
+        return;
+    }
+
+    Conta *contaOrigem = &contas[indiceOrigem];
+    Conta *contaDestino = &contas[indiceDestino];
+
+    int confirma;
+    float valor;
+    printf("\nValor: ");
+    scanf("%f", &valor);
+
+    if (contaOrigem->saldo < valor)
+    {
+        printf("\nSaldo da conta insuficente!\n");
+        return;
+    }
+
+    printf("Enviar pix de: %.2f para %s chave '%s' ?\nTecle 1 para confirmar e 0 para cancelar: ", valor, contaDestino->titular->nome, contaDestino->titular->cpf);
+    scanf("%d", &confirma);
+
+    if (confirma == 1)
+    {
+        contaOrigem->saldo -= valor;
+        contaDestino->saldo += valor;
+        printf("\nPix enviado com sucesso!\n");
+        printf("Novo saldo conta de origem: %.2f\n", contaOrigem->saldo);
+        printf("Novo saldo conta de destino: %.2f\n", contaDestino->saldo);
+    }
+    else
+    {
+        printf("\nOperacao cancelada!\n");
+    }
 }
 
 void exibeMenu()
@@ -294,18 +380,27 @@ int main()
             printf("\nNumero da conta: ");
             scanf("%d", &numeroConta);
             deposita(vascoBank->contas, qtdContas, numeroConta);
-        } else if (opcao == 3) {
+        }
+        else if (opcao == 3)
+        {
             printf("\nSacar\n");
             int numeroConta;
             printf("\nNumero da conta: ");
             scanf("%d", &numeroConta);
             saca(vascoBank->contas, qtdContas, numeroConta);
-        } else if (opcao == 4) {
+        }
+        else if (opcao == 4)
+        {
             printf("\nConsultar Saldo\n");
             int numeroConta;
             printf("\nNumero da conta: ");
             scanf("%d", &numeroConta);
             consultaSaldo(vascoBank->contas, qtdContas, numeroConta);
+        }
+        else if (opcao == 5)
+        {
+            printf("\nRealizar Transferencia Pix\n");
+            realizaPix(vascoBank->contas, qtdContas);
         }
 
         printf("\nTecle 1 para continuar: ");
