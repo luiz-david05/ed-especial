@@ -2,45 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
-#include <stdbool.h>
-
-typedef struct
-{
-    char logradouro[250];
-    int numero;
-    char cep[9];
-    char uf[3];
-} Endereco;
-
-typedef struct
-{
-    Endereco endereco;
-    char nome[120];
-    char cpf[15];
-    float renda;
-} Titular;
-
-typedef struct
-{
-    char data[11];
-    char tipo[7];
-    float valor;
-} Transacoes;
-
-typedef struct
-{
-    Titular *titular;
-    int numero;
-    float saldo;
-    Transacoes transacoes;
-} Conta;
-
-typedef struct
-{
-    Endereco endereco;
-    Conta *contas;
-    char nome[120];
-} Banco;
+#include "banco.h"
 
 Titular *criaTitular()
 {
@@ -48,7 +10,7 @@ Titular *criaTitular()
 
     if (titular == NULL)
     {
-        printf("Falha ao alocar memoria\n");
+        printf("Falha ao alocar memoria para criar um titular\n");
         exit(EXIT_FAILURE);
     }
 
@@ -84,6 +46,44 @@ Titular *criaTitular()
     return titular;
 }
 
+Data criaDataAtual() {
+    time_t agora;
+    struct tm *info_tempo;
+    time(&agora);
+    info_tempo = localtime(&agora);
+
+    Data dataAtual;
+    dataAtual.dia = info_tempo->tm_mday;
+    dataAtual.mes = info_tempo->tm_mon + 1;
+    dataAtual.ano = info_tempo->tm_year + 1900;
+
+    return dataAtual;
+}
+
+Transacao *criaTransacao() {
+    Transacao *novaTransacao = (Transacao *)malloc(sizeof(Transacao));
+
+    if (novaTransacao == NULL)
+    {
+        printf("Falha ao alocar memoria para criar transacao\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    return novaTransacao;
+}
+
+void adicionaTransacao(Conta *conta, Transacao *novaTransacao, int *qtdTransacoes) {
+    conta->transacoes = (Transacao *)realloc(conta->transacoes, (*qtdTransacoes + 1) * sizeof(Transacao));
+
+    if (conta->transacoes == NULL) {
+        printf("\nFalha ao alocar memoria para adicionar transacao\n");
+        exit(EXIT_FAILURE);
+    }
+
+    conta->transacoes[*qtdTransacoes] = *novaTransacao;
+    (*qtdTransacoes)++;
+}
+
 Conta *criaConta()
 {
     Conta *novaConta;
@@ -91,7 +91,7 @@ Conta *criaConta()
 
     if (novaConta == NULL)
     {
-        printf("Falha ao alocar memoria\n");
+        printf("Falha ao alocar memoria para criar uma conta\n");
         exit(EXIT_FAILURE);
     }
 
@@ -106,14 +106,14 @@ Conta *criaConta()
     return novaConta;
 }
 
-Banco *CriaBanco()
+Banco *criaBanco()
 {
     Banco *novoBanco;
     novoBanco = (Banco *)malloc(sizeof(Banco));
 
     if (novoBanco == NULL)
     {
-        printf("Falha ao alocar memoria\n");
+        printf("Falha ao alocar memoria para criar banco\n");
         exit(EXIT_FAILURE);
     }
 
@@ -140,17 +140,6 @@ int consultaContaPorIndice(Conta *contas, int numeroConta, int qtdContas)
     return -1;
 }
 
-// void consultaConta(Conta *contas, int numeroConta, int qtdContas) {
-//     int indice = consultaContaPorIndice(contas, numeroConta, qtdContas);
-
-//     if (indice != -1) {
-//         printf("\nConta encontrada!\n");
-//         printf("\nNumero da conta: '%d' - CPF do titular: %s\n", contas[indice].numero, contas[indice].titular->cpf);
-//     } else {
-//         printf("\nConta nao encontrada\n");
-//     }
-// }
-
 void adicionaContaAoBanco(Banco *banco, Conta *novaConta, int *qtdContas)
 {
     int indice = consultaContaPorIndice(banco->contas, novaConta->numero, *qtdContas);
@@ -166,7 +155,7 @@ void adicionaContaAoBanco(Banco *banco, Conta *novaConta, int *qtdContas)
 
     if (banco->contas == NULL)
     {
-        printf("Falha ao realocar memoria\n");
+        printf("Falha ao realocar memoria para uma nova conta\n");
         exit(EXIT_FAILURE);
     }
 
@@ -174,25 +163,7 @@ void adicionaContaAoBanco(Banco *banco, Conta *novaConta, int *qtdContas)
     (*qtdContas)++;
 }
 
-void listaContasBanco(Banco *banco, int qtdContas)
-{
-    if (qtdContas > 0)
-    {
-        int i;
-        printf("\n\t\tContas do banco\n\n");
-        for (i = 0; i < qtdContas; i++)
-        {
-            printf("Numero da conta: '%d' - CPF do titular: %s\n", banco->contas[i].numero, banco->contas[i].titular->cpf);
-            printf("---------------------------------------------------------\n");
-        }
-    }
-    else
-    {
-        printf("\nSem contas para exibir.\n");
-    }
-}
-
-void deposita(Conta *contas, int qtdContas, int numeroConta)
+void deposita(Conta *contas, int qtdContas, int numeroConta, int *qtdTransacoes)
 {
     int indice = consultaContaPorIndice(contas, numeroConta, qtdContas);
     int confirma;
@@ -215,6 +186,12 @@ void deposita(Conta *contas, int qtdContas, int numeroConta)
         contaProcurada->saldo += valor;
         printf("\nDeposito realizado com sucesso!\n");
         printf("Novo saldo: %.2f\n", contaProcurada->saldo);
+        
+        Transacao *novaTransacao = criaTransacao();
+        strcpy(novaTransacao->tipo, "Deposito");
+        novaTransacao->valor = valor;
+
+        adicionaTransacao(contaProcurada, novaTransacao, qtdTransacoes);
     }
     else
     {
@@ -346,71 +323,69 @@ void realizaPix(Conta *contas, int qtdContas)
     }
 }
 
-void exibeMenu()
+void alteraDados(Conta *contas, int qtdContas, int numeroConta)
 {
-    char menu[] = "\n\t\t\t>>>> VASCO BANK <<<<\n1 - Abrir Conta\n2 - Depositar\n3 - Sacar\n4 - Consultar saldo\n5 - Realizar transferencia pix\n6 - Alterar dados\n7 - Gerar extrato Bancario\n0 - sair\n\ndigite aqui ->: ";
-    printf("%s", menu);
-}
+    int indice = consultaContaPorIndice(contas, numeroConta, qtdContas);
 
-int main()
-{
-    srand(time(NULL));
-
-    Banco *vascoBank = CriaBanco();
-    int qtdContas = 0;
-
-    exibeMenu();
-    int opcao;
-    scanf("%d", &opcao);
-    int pause;
-
-    while (opcao > 0)
+    if (indice == -1)
     {
-        if (opcao == 1)
-        {
-            printf("\nAbrir Conta\n");
-            Conta *novaConta = criaConta();
-            adicionaContaAoBanco(vascoBank, novaConta, &qtdContas);
-            printf("\nBem-vindo ao Vasco Bank\n");
-        }
-        else if (opcao == 2)
-        {
-            printf("\nDepositar\n");
-            int numeroConta;
-            printf("\nNumero da conta: ");
-            scanf("%d", &numeroConta);
-            deposita(vascoBank->contas, qtdContas, numeroConta);
-        }
-        else if (opcao == 3)
-        {
-            printf("\nSacar\n");
-            int numeroConta;
-            printf("\nNumero da conta: ");
-            scanf("%d", &numeroConta);
-            saca(vascoBank->contas, qtdContas, numeroConta);
-        }
-        else if (opcao == 4)
-        {
-            printf("\nConsultar Saldo\n");
-            int numeroConta;
-            printf("\nNumero da conta: ");
-            scanf("%d", &numeroConta);
-            consultaSaldo(vascoBank->contas, qtdContas, numeroConta);
-        }
-        else if (opcao == 5)
-        {
-            printf("\nRealizar Transferencia Pix\n");
-            realizaPix(vascoBank->contas, qtdContas);
-        }
-
-        printf("\nTecle 1 para continuar: ");
-        scanf("%d", &pause);
-        exibeMenu();
-        scanf("%d", &opcao);
+        printf("\nConta nao encontrada!\n");
+        return;
     }
 
-    printf("\nOPERACAO ENCERRADA.\n");
+    Conta *contaProcurada = &contas[indice];
 
-    free(vascoBank);
-    return 0;
+    int reply;
+    printf("\nQuais dados alterar: 1 - Nome e 2 - renda\n->: ");
+    scanf("%d", &reply);
+
+    if (reply == 1) {
+        printf("Informe o novo nome: ");
+        getchar();
+        char novoNome[120];
+        fgets(novoNome, sizeof(novoNome), stdin);
+        novoNome[strcspn(novoNome, "\n")] = '\0';
+
+        strcpy(contaProcurada->titular->nome, novoNome);
+    } else if (reply == 2) {
+        float novaRenda;
+        printf("Informe a nova renda: ");
+        scanf("%f", &novaRenda);
+
+        contaProcurada->titular->renda = novaRenda;
+    } else {
+        printf("\nAlternativa invalida!\n");
+        return;
+    }
+}
+
+ void geraExtrato(Conta *contas, int qtdTransacoes, int numeroConta, int qtdContas) {
+    int indice = consultaContaPorIndice(contas, numeroConta, qtdContas);
+
+    if (indice == -1) {
+        printf("\nConta nao encontrada\n");
+        return;
+    }
+
+    Conta *contaProcurada = &contas[indice];
+
+    printf("\nExtrato da conta: %d\n", numeroConta);
+    printf("----------------------------------------\n");
+
+    int i;
+    for (i = 0; i < qtdTransacoes; i++) {
+        Data dataTransacao = contaProcurada->transacoes[i].data;
+
+        printf("Data da transacao: %02d/%02d/%d\n", dataTransacao.dia, dataTransacao.mes, dataTransacao.ano);
+        printf("Tipo de transacao: %s\n", contaProcurada->transacoes[i].tipo);
+        printf("Valor: %.2f\n", contaProcurada->transacoes[i].valor);
+        printf("----------------------------------------\n");
+    }
+}
+
+
+void exibeMenu()
+{
+    char menu[] = "\n\t\t\t>>>> VASCO BANK <<<<\n1 - Abrir Conta\n2 - Depositar\n3 - Sacar\n4 - Consultar saldo\n5 - Realizar transferencia pix\n6 - Alterar dados do titular\n7 - Gerar extrato Bancario\n0 - sair\n\ndigite aqui ->: ";
+    printf("%s", menu);
 }
