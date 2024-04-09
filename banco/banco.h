@@ -35,7 +35,6 @@ typedef struct
     Titular *titular;
     int numero;
     float saldo;
-    int qtdTransacoes;
     Transacao *transacoes;
 } Conta;
 
@@ -53,15 +52,12 @@ Conta *criaConta();
 Banco *criaBanco();
 int consultaContaPorIndice(Conta *contas, int numeroConta, int qtdContas);
 void adicionaContaAoBanco(Banco *banco, Conta *novaConta, int *qtdContas);
-void adicionaTransacao(Conta *conta, Transacao *novaTransacao);
-void deposita(Conta *contas, int qtdContas, int numeroConta, float valor);
-void saca(Conta *contas, int qtdContas, int numeroConta, float valor);
+void adicionaTransacao(Conta *conta, Transacao *novaTransacao, int *qtdTransacoes);
+void deposita(Conta *contas, int qtdContas, int numeroConta, float valor, int *qtdTransacoes);
+void saca(Conta *contas, int qtdContas, int numeroConta, float valor, int *qtdTransacoes);
 void consultaSaldo(Conta *contas, int qtdContas, int numeroConta);
 int consultaChavePix(Conta *contas, int qtdContas, char *chave);
-void realizaPix(Conta *contas, int qtdContas);
+void realizaPix(Conta *contas, int qtdContas, int *qtdTransacoes, char *chaveOrigem, char *chaveDestino);
 void alteraDados(Conta *contas, int qtdContas, int numeroConta);
-void geraExtrato(Conta *contas, int qtdTransacoes, int numeroConta, int qtdContas);
+void geraExtrato(Conta *contas, int numeroConta, int qtdContas, int qtdTransacoes);
 void exibeMenu();
-// teste arquivos
-void salvaContasArquivo(Conta *contas, int qtdContas);
-void carregaContasArquivo(Banco *banco, int *qtdContas);

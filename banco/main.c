@@ -4,50 +4,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-void liberaMemoria(Conta *contas, int qtdContas) {
+void liberaMemoria(Banco *banco, int qtdContas)
+{
     int i;
-    for (i = 0; i < qtdContas; i++) {
-        free(contas[i].titular);
-        free(contas[i].transacoes);
+    for (i = 0; i < qtdContas; i++)
+    {
+        free(banco->contas[i].titular);
     }
-}
 
-void salvaDados(Banco *banco, int qtdContas) {
-    salvaContasArquivo(banco->contas, qtdContas);
-}
-
-void criaNovoArquivoContas() {
-    FILE *arquivo = fopen("contas.txt", "w");
-    if (arquivo == NULL) {
-        printf("Erro ao criar o novo arquivo de contas.\n");
-        exit(EXIT_FAILURE);
-    }
-    printf("Novo arquivo de contas criado.\n");
-    fclose(arquivo);
-}
-
-void listaContas(Conta *contas, int qtdContas) {
-    int i;
-    for (i = 0; i < qtdContas; i++) {
-        printf("Conta [%d]\n", i+1);
-        printf("Conta: %d; Nome: %s; CPF: %s; Saldo: %.2f\n", contas[i].numero, contas[i].titular->nome, contas[i].titular->cpf, contas[i].saldo);
-    }
-}
-
-void verificaArquivoContas() {
-    FILE *arquivo = fopen("contas.txt", "r");
-    if (arquivo == NULL) {
-        printf("O arquivo de contas não existe.\n");
-        char resposta;
-        printf("Deseja criar um novo arquivo de contas? (s/n): ");
-        scanf(" %c", &resposta);
-        if (resposta == 's' || resposta == 'S') {
-            criaNovoArquivoContas();
-        } else {
-            exit(EXIT_SUCCESS);
-        }
-    }
-    fclose(arquivo);
+    free(banco->contas);
+    free(banco);
 }
 
 int main()
@@ -56,12 +22,8 @@ int main()
 
     Banco *agiotagens = criaBanco();
     int qtdContas = 0;
+    int qtdTransacoes = 0;
 
-    verificaArquivoContas();
-    carregaContasArquivo(agiotagens, &qtdContas);
-
-    printf("\nQuantidade de contas no banco: %d\n", qtdContas);
-    listaContas(agiotagens->contas, qtdContas);
     exibeMenu();
     int opcao;
     scanf("%d", &opcao);
@@ -85,7 +47,7 @@ int main()
             int numeroConta;
             printf("\nNumero da conta: ");
             scanf("%d", &numeroConta);
-            deposita(agiotagens->contas, qtdContas, numeroConta, valor);
+            deposita(agiotagens->contas, qtdContas, numeroConta, valor, &qtdTransacoes);
         }
         else if (opcao == 3)
         {
@@ -96,7 +58,7 @@ int main()
             int numeroConta;
             printf("\nNumero da conta: ");
             scanf("%d", &numeroConta);
-            saca(agiotagens->contas, qtdContas, numeroConta, valor);
+            saca(agiotagens->contas, qtdContas, numeroConta, valor, &qtdTransacoes);
         }
         else if (opcao == 4)
         {
@@ -109,33 +71,48 @@ int main()
         else if (opcao == 5)
         {
             printf("\nRealizar Transferencia Pix\n");
-            realizaPix(agiotagens->contas, qtdContas);
-        } else if (opcao == 6) {
+
+            char chaveOrigem[15];
+            char chaveDestino[15];
+
+            getchar();
+            printf("Informe a chave de origem: ");
+            fgets(chaveOrigem, sizeof(chaveOrigem), stdin);
+            chaveOrigem[strcspn(chaveOrigem, "\n")] = '\0';
+
+            printf("Informe a chave de destino: ");
+            fgets(chaveDestino, sizeof(chaveDestino), stdin);
+            chaveDestino[strcspn(chaveDestino, "\n")] = '\0';
+
+            realizaPix(agiotagens->contas, qtdContas, &qtdTransacoes, chaveOrigem, chaveDestino);
+        }
+        else if (opcao == 6)
+        {
             printf("\nAltera dados do titular\n");
             int numeroConta;
             printf("Informe o numero da conta: ");
             scanf("%d", &numeroConta);
 
             alteraDados(agiotagens->contas, qtdContas, numeroConta);
-        } // else if (opcao == 7) {
-        //     printf("\nGerar extrato bancario\n");
-        //     int numeroConta;
-        //     printf("Informe o numero da conta: ");
-        //     scanf("%d", &numeroConta);
+        }
+        else if (opcao == 7)
+        {
+            printf("\nGerar extrato bancario\n");
+            int numeroConta;
+            printf("Informe o numero da conta: ");
+            scanf("%d", &numeroConta);
 
-        //     geraExtrato(agiotagens->contas, qtdTransacoes, numeroConta, qtdContas);
-        // }
+            geraExtrato(agiotagens->contas, numeroConta, qtdContas, qtdTransacoes);
+        }
 
         printf("\nTecle 1 para continuar: ");
         scanf("%d", &pause);
         exibeMenu();
         scanf("%d", &opcao);
-        // atexit((void(*)(void))salvaDados);
     }
 
-    salvaDados(agiotagens, qtdContas);
+    liberaMemoria(agiotagens, qtdContas);
     printf("\nOPERACAO ENCERRADA.\n");
 
-    free(agiotagens);
     return 0;
 }

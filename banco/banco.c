@@ -14,39 +14,20 @@ Titular *criaTitular()
         exit(EXIT_FAILURE);
     }
 
-    strcpy(titular->nome, "teste");
-    strcpy(titular->cpf, "123.456.789-00");
-    // getchar();
-    // printf("Informe o nome do titular: ");
-    // fgets(titular->nome, sizeof(titular->nome), stdin);
-    // titular->nome[strcspn(titular->nome, "\n")] = '\0';
+    getchar();
+    printf("Nome do titular: ");
+    fgets(titular->nome, sizeof(titular->nome), stdin);
+    titular->nome[strcspn(titular->nome, "\n")] = '\0';
 
-    // printf("Informe o cpf do titular(no formato ***.***.***-**): ");
-    // fgets(titular->cpf, sizeof(titular->cpf), stdin);
-    // titular->cpf[strcspn(titular->cpf, "\n")] = '\0'; 
-
-    // printf("\nInforme a renda mensal do titular: ");
-    // scanf("%d", &titular->renda);
-
-    // printf("Preencher os campos do endereco do titular.\n");
-    // printf("Logradouro: ");
-    // fgets(titular->endereco.logradouro, sizeof(titular->endereco.logradouro), stdin);
-    // titular->endereco.logradouro[strcspn(titular->endereco.logradouro, "\n")] = '\0';
-
-    // printf("Numero: ");
-    // scanf("%d", &titular->endereco.numero);
-    // printf("\nCEP (no formato: *****-***): ");
-    // fgets(titular->endereco.cep, sizeof(titular->endereco.cep), stdin);
-    // titular->endereco.cep[strcspn(titular->endereco.cep, "\n")] = '\0';
-
-    // printf("\nUF: ");
-    // fgets(titular->endereco.uf, sizeof(titular->endereco.uf), stdin);
-    // titular->endereco.uf[strcspn(titular->endereco.uf, "\n")] = '\0';
+    printf("CPF: ");
+    fgets(titular->cpf, sizeof(titular->cpf), stdin);
+    titular->cpf[strcspn(titular->cpf, "\n")] = '\0';
 
     return titular;
 }
 
-Data criaDataAtual() {
+Data criaDataAtual()
+{
     time_t agora;
     struct tm *info_tempo;
     time(&agora);
@@ -60,7 +41,8 @@ Data criaDataAtual() {
     return dataAtual;
 }
 
-Transacao *criaTransacao() {
+Transacao *criaTransacao()
+{
     Transacao *novaTransacao = (Transacao *)malloc(sizeof(Transacao));
 
     if (novaTransacao == NULL)
@@ -68,20 +50,22 @@ Transacao *criaTransacao() {
         printf("Falha ao alocar memoria para criar transacao\n");
         exit(EXIT_FAILURE);
     }
-    
+
     return novaTransacao;
 }
 
-void adicionaTransacao(Conta *conta, Transacao *novaTransacao) {
-    conta->transacoes = (Transacao *)realloc(conta->transacoes, (conta->qtdTransacoes + 1) * sizeof(Transacao));
+void adicionaTransacao(Conta *conta, Transacao *novaTransacao, int *qtdTransacoes)
+{
+    conta->transacoes = (Transacao *)realloc(conta->transacoes, (*qtdTransacoes + 1) * sizeof(Transacao));
 
-    if (conta->transacoes == NULL) {
+    if (conta->transacoes == NULL)
+    {
         printf("\nFalha ao alocar memoria para adicionar transacao\n");
         exit(EXIT_FAILURE);
     }
 
-    conta->transacoes[conta->qtdTransacoes] = *novaTransacao;
-    conta->qtdTransacoes++;
+    conta->transacoes[*qtdTransacoes] = *novaTransacao;
+    (*qtdTransacoes)++;
 }
 
 Conta *criaConta()
@@ -164,7 +148,7 @@ void adicionaContaAoBanco(Banco *banco, Conta *novaConta, int *qtdContas)
     (*qtdContas)++;
 }
 
-void deposita(Conta *contas, int qtdContas, int numeroConta, float valor)
+void deposita(Conta *contas, int qtdContas, int numeroConta, float valor, int *qtdTransacoes)
 {
     int indice = consultaContaPorIndice(contas, numeroConta, qtdContas);
     int confirma;
@@ -185,12 +169,12 @@ void deposita(Conta *contas, int qtdContas, int numeroConta, float valor)
         printf("\nDeposito realizado com sucesso!\n");
         printf("Novo saldo: %.2f\n", contaProcurada->saldo);
 
-        // Transacao *novaTransacao;
-        // novaTransacao = criaTransacao();
-        // novaTransacao->data = criaDataAtual();
-        // strcpy(novaTransacao->tipo, "Deposito");
-        // novaTransacao->valor = valor;
-        // adicionaTransacao(contaProcurada, novaTransacao);
+        Transacao *novaTransacao;
+        novaTransacao = criaTransacao();
+        novaTransacao->data = criaDataAtual();
+        strcpy(novaTransacao->tipo, "Deposito");
+        novaTransacao->valor = valor;
+        adicionaTransacao(contaProcurada, novaTransacao, qtdTransacoes);
     }
     else
     {
@@ -198,7 +182,7 @@ void deposita(Conta *contas, int qtdContas, int numeroConta, float valor)
     }
 }
 
-void saca(Conta *contas, int qtdContas, int numeroConta, float valor)
+void saca(Conta *contas, int qtdContas, int numeroConta, float valor, int *qtdTransacoes)
 {
     int indice = consultaContaPorIndice(contas, numeroConta, qtdContas);
     int confirma;
@@ -226,12 +210,12 @@ void saca(Conta *contas, int qtdContas, int numeroConta, float valor)
         printf("\nSaque realizado com sucesso!\n");
         printf("Novo saldo: %.2f\n", contaProcurada->saldo);
 
-        // Transacao *novaTransacao;
-        // novaTransacao = criaTransacao();
-        // novaTransacao->data = criaDataAtual();
-        // strcpy(novaTransacao->tipo, "Saque");
-        // novaTransacao->valor = -valor;
-        // adicionaTransacao(contaProcurada, novaTransacao);
+        Transacao *novaTransacao;
+        novaTransacao = criaTransacao();
+        novaTransacao->data = criaDataAtual();
+        strcpy(novaTransacao->tipo, "Saque");
+        novaTransacao->valor = -valor;
+        adicionaTransacao(contaProcurada, novaTransacao, qtdTransacoes);
     }
     else
     {
@@ -266,34 +250,29 @@ int consultaChavePix(Conta *contas, int qtdContas, char *chave)
     return -1;
 }
 
-void realizaPix(Conta *contas, int qtdContas)
+void realizaPix(Conta *contas, int qtdContas, int *qtdTransacoes, char *chaveOrigem, char *chaveDestino)
 {
-    char chaveOrigem[15];
-    char chaveDestino[15];
-
-    getchar();
-    printf("Informe a chave de origem: ");
-    fgets(chaveOrigem, sizeof(chaveOrigem), stdin);
-    chaveOrigem[strcspn(chaveOrigem, "\n")] = '\0';
-
-    printf("Informe a chave de destino: ");
-    fgets(chaveDestino, sizeof(chaveDestino), stdin);
-    chaveDestino[strcspn(chaveDestino, "\n")] = '\0';
+    printf("\nChave de origem: %s\n", chaveOrigem);
+    printf("Chave de destino: %s\n", chaveDestino);
 
     int indiceOrigem = consultaChavePix(contas, qtdContas, chaveOrigem);
     int indiceDestino = consultaChavePix(contas, qtdContas, chaveDestino);
 
     if (indiceOrigem == -1)
     {
-        printf("\nChave pix '%s' nao encontrada\n", chaveOrigem);
+        printf("\nChave pix de origem '%s' nao encontrada\n", chaveOrigem);
         return;
     }
 
     if (indiceDestino == -1)
     {
-        printf("\nChave pix '%s' nao encontrada\n", chaveDestino);
+        printf("\nChave pix de destino '%s' nao encontrada\n", chaveDestino);
         return;
     }
+
+    printf("\nChave de origem encontrada na conta de nome: '%s'\n", contas[indiceOrigem].titular->nome);
+    printf("Chave de destino encontrada na conta de nome: '%s'\n", contas[indiceDestino].titular->nome);
+
 
     Conta *contaOrigem = &contas[indiceOrigem];
     Conta *contaDestino = &contas[indiceDestino];
@@ -320,17 +299,17 @@ void realizaPix(Conta *contas, int qtdContas)
         printf("Novo saldo conta de origem: %.2f\n", contaOrigem->saldo);
         printf("Novo saldo conta de destino: %.2f\n", contaDestino->saldo);
 
-        // Transacao *transacaoOrigem = criaTransacao();
-        // transacaoOrigem->data = criaDataAtual();
-        // strcpy(transacaoOrigem->tipo, "PIX Enviado");
-        // transacaoOrigem->valor = -valor;
-        // adicionaTransacao(contaOrigem, transacaoOrigem);
+        Transacao *transacaoOrigem = criaTransacao();
+        transacaoOrigem->data = criaDataAtual();
+        strcpy(transacaoOrigem->tipo, "PIX Enviado");
+        transacaoOrigem->valor = -valor;
+        adicionaTransacao(contaOrigem, transacaoOrigem, qtdTransacoes);
 
-        // Transacao *transacaoDestino = criaTransacao();
-        // transacaoDestino->data = criaDataAtual();
-        // strcpy(transacaoDestino->tipo, "PIX Recebido");
-        // transacaoDestino->valor = valor;
-        // adicionaTransacao(contaDestino, transacaoDestino);
+        Transacao *transacaoDestino = criaTransacao();
+        transacaoDestino->data = criaDataAtual();
+        strcpy(transacaoDestino->tipo, "PIX Recebido");
+        transacaoDestino->valor = valor;
+        adicionaTransacao(contaDestino, transacaoDestino, qtdTransacoes);
     }
     else
     {
@@ -355,7 +334,8 @@ void alteraDados(Conta *contas, int qtdContas, int numeroConta)
     printf("\nQuais dados alterar: 1 - Nome e 2 - renda\n->: ");
     scanf("%d", &reply);
 
-    if (reply == 1) {
+    if (reply == 1)
+    {
         printf("Informe o novo nome: ");
         getchar();
         char novoNome[120];
@@ -363,22 +343,28 @@ void alteraDados(Conta *contas, int qtdContas, int numeroConta)
         novoNome[strcspn(novoNome, "\n")] = '\0';
 
         strcpy(contaProcurada->titular->nome, novoNome);
-    } else if (reply == 2) {
+    }
+    else if (reply == 2)
+    {
         float novaRenda;
         printf("Informe a nova renda: ");
         scanf("%f", &novaRenda);
 
         contaProcurada->titular->renda = novaRenda;
-    } else {
+    }
+    else
+    {
         printf("\nAlternativa invalida!\n");
         return;
     }
 }
 
-void geraExtrato(Conta *contas, int qtdTransacoes, int numeroConta, int qtdContas) {
+void geraExtrato(Conta *contas, int numeroConta, int qtdContas, int qtdTransacoes)
+{
     int indice = consultaContaPorIndice(contas, numeroConta, qtdContas);
 
-    if (indice == -1) {
+    if (indice == -1)
+    {
         printf("\nConta nao encontrada\n");
         return;
     }
@@ -389,64 +375,23 @@ void geraExtrato(Conta *contas, int qtdTransacoes, int numeroConta, int qtdConta
     printf("----------------------------------------\n");
 
     int i;
-    for (i = 0; i < qtdTransacoes; i++) {
-        printf("Data da transacao: %02d/%02d/%d\n", contaProcurada->transacoes[i].data.dia, contaProcurada->transacoes[i].data.mes, contaProcurada->transacoes[i].data.ano);
-        printf("Tipo de transacao: %s\n", contaProcurada->transacoes[i].tipo);
-        printf("Valor: %.2f\n", contaProcurada->transacoes[i].valor);
-        printf("----------------------------------------\n");
+    for (i = 0; i < qtdTransacoes; i++)
+    {
+        Transacao transacao = contaProcurada->transacoes[i];
+
+        // evitar transacoes com dados invalidos
+        if (transacao.data.dia >= 1 && transacao.data.dia <= 31)
+        {
+            printf("Data da transacao: %02d/%02d/%d\n", contaProcurada->transacoes[i].data.dia, contaProcurada->transacoes[i].data.mes, contaProcurada->transacoes[i].data.ano);
+            printf("Tipo de transacao: %s\n", contaProcurada->transacoes[i].tipo);
+            printf("Valor: %.2f\n", contaProcurada->transacoes[i].valor);
+            printf("----------------------------------------\n");
+        }
     }
 }
-
-// teste arquivo
-
-// erro após ler conta salvo, ao ler novamente alguns campos sãoa apagados![importante]
-void salvaContasArquivo(Conta *contas, int qtdContas) {
-    FILE *arquivo = fopen("contas.txt", "w");
-
-    if (arquivo == NULL) {
-        printf("Erro ao abrir o arquivo para escrita.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    for (int i = 0; i < qtdContas; i++) {
-        fprintf(arquivo, "%d;%s;%s;%.2f\n", contas[i].numero, contas[i].titular->nome, contas[i].titular->cpf, contas[i].saldo);
-    }
-
-    fclose(arquivo);
-}
-
-void carregaContasArquivo(Banco *banco, int *qtdContas) {
-    FILE *arquivo = fopen("contas.txt", "r");
-    
-    if (arquivo == NULL) {
-        fprintf(stderr, "Erro ao abrir o arquivo para leitura.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    char linha[256];
-    while (fgets(linha, sizeof(linha), arquivo) != NULL) {
-        int numero;
-        char nome[120];
-        char cpf[15];
-        float saldo;
-
-        sscanf(linha, "%d;%[^;];%[^;];%f\n", &numero, nome, cpf, &saldo);
-
-        Conta *novaConta = (Conta *)malloc(sizeof(Conta));
-        novaConta->numero = numero;
-        strncpy(novaConta->titular->nome, nome, sizeof(novaConta->titular->nome) - 1);
-        strncpy(novaConta->titular->cpf, cpf, sizeof(novaConta->titular->cpf) - 1);
-        novaConta->saldo = saldo;
-
-        adicionaContaAoBanco(banco, novaConta, qtdContas);
-    }
-
-    fclose(arquivo);
-}
-
 
 void exibeMenu()
 {
-    char menu[] = "\n\t\t\t>>>> AGIOTAGENS & CIA <<<<\n1 - Abrir Conta\n2 - Depositar\n3 - Sacar\n4 - Consultar saldo\n5 - Realizar transferencia pix\n6 - Alterar dados do titular\n0 - sair\n\ndigite aqui ->: ";
+    char menu[] = "\n\t\t\t>>>> AGIOTAGENS & CIA <<<<\n1 - Abrir Conta\n2 - Depositar\n3 - Sacar\n4 - Consultar saldo\n5 - Realizar transferencia pix\n6 - Alterar dados do titular\n7 - Gera extrato bancario\n0 - sair\n\ndigite aqui ->: ";
     printf("%s", menu);
 }
