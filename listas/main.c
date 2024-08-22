@@ -1,11 +1,14 @@
 #include "lista.h"
 
 int main() {
-    Lista* lista = novaLista();
-    lista = inserirInicio(lista, 11);
-    lista = inserirInicio(lista, 25);
-    lista = inserirInicio(lista, 10);
-    lista = inserirFinal(lista, 12);
+    Lista* lista = criaLista();
+    lista = inserirInicio(lista, 1);
+    lista = inserirInicio(lista, 2);
+    lista = inserirInicio(lista, 3);
+    lista = inserirFinal(lista, 0);
+    listarElementos(lista);
+    // posicao maior que o tamanho da lista, vai para o fim da lista
+    lista = inserirPos(lista, 5, 6);
     listarElementos(lista);
 
     return 0;

@@ -8,13 +8,14 @@ struct lista {
 
 typedef struct lista Lista;
 
-Lista* novaLista();
+Lista* criaLista();
 Lista* inserirInicio(Lista* lista, int valor);
-Lista* inserirFinal(Lista *lista, int valor);
-Lista* removerInicio(Lista* lista);
-// void removeFinal(Lista* lista);
-void listarElementos(Lista* lista);
 int estaVazia(Lista* lista);
+Lista* inserirFinal(Lista *lista, int valor);
+Lista *inserirPos(Lista* lista, int valor, int pos);
 void listarElementos(Lista* lista);
+// Lista* removerInicio(Lista* lista);
+// // void removeFinal(Lista* lista);
+// void listarElementos(Lista* lista);
 
 #endif
