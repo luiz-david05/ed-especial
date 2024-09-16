@@ -1,20 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "pilha.h"
 
 // Exemplo de alocação estática
 
 // Aloca memória para a pilha e inicializa o topo
 #define MAX 10
 
-typedef struct {
+struct pilha {
     int topo;
     int vet[MAX];
-} Pilha;
+};
 
 // Cria uma pilha vazia
 Pilha* criaPilha() {
     // Aloca memória para a pilha
     Pilha* p = (Pilha*) malloc(sizeof(Pilha));
+
+    if (!p) {
+        perror("Falha na alocação de memória");
+        exit(EXIT_FAILURE);
+    }
     p->topo = -1;
     return p;
 }
@@ -51,22 +57,9 @@ int isFull(Pilha* p) {
     return p->topo == MAX-1;
 }
 
-int main() {
-    Pilha* p = criaPilha();
-
-    int elemento = 5;
-    while (elemento >= 1) {
-        push(p, elemento);
-        printf("Empilhei %d\n", elemento);
-        elemento -= 1;
+void freePilha(Pilha* p) {
+    if (p) {
+        free(p);
+        printf("Memoria da pilha liberada!");
     }
-    
-    while (!isEmpty(p)) {
-        int elemento = pop(p);
-        printf("Desempilhei %d\n", elemento);
-    }
-
-    int e = pop(p);
-
-    return 0;
 }

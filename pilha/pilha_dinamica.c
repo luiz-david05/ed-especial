@@ -1,20 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "pilha.h"
 
 // Exemplo de alocação dinâmica
 
 // Aloca memória para a pilha e inicializa o topo
-typedef struct {
+struct pilha {
     int topo;
-    int* vet;
+    int *vet;
     int max;
-} Pilha;
+};
 
 Pilha* criaPilha(int max) {
     Pilha* p = (Pilha*) malloc(sizeof(Pilha));
+    if (p == NULL) {
+        fprintf(stderr, "Erro na alocacao de memoria para a pilha.\n");
+        exit(EXIT_FAILURE);
+    }
     p->topo = -1;
     p->max = max;
     p->vet = (int*) malloc(max * sizeof(int));
+    if (p->vet == NULL) {
+        free(p);
+        fprintf(stderr, "Erro na alocacao de memoria para os elementos da pilha.\n");
+        exit(EXIT_FAILURE);
+    }
     return p;
 }
 
@@ -50,19 +60,10 @@ int isFull(Pilha* p) {
     return p->topo == p->max-1;
 }
 
-int main() {
-    Pilha* p = criaPilha(5);
-
-    int elemento = 5;
-    while (elemento >= 1) {
-        push(p, elemento);
-        printf("Empilhei %d\n", elemento);
-        elemento -= 1;
+void freePilha(Pilha* p) {
+    if (p) {
+        free(p->vet);
+        free(p);
+        printf("Memoria da pilha liberada!");
     }
-    
-    while (!isEmpty(p)) {
-        int elemento = pop(p);
-        printf("Desempilhei %d\n", elemento);
-    }
-    return 0;
 }
